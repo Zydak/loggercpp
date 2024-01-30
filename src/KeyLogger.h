@@ -1,7 +1,7 @@
 #pragma once
 #include "Windows.h"
 #include "fstream"
-//#include <codecvt>
+#include <codecvt>
 #include <chrono>
 
 class Timer
@@ -70,7 +70,7 @@ private:
 	static uint32_t s_TimerThreshold;
 
 	// Use a library instead of deprecated functions?
-// 	static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> s_Utf8To16Converter;
-// 	static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> s_Utf16To8Converter;
-// 	static std::wstring_convert<std::codecvt_utf8<wchar_t>> s_WCharTo8ConverterWChar;
+	static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> s_Utf8To16Converter;
+	static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> s_Utf16To8Converter;
+	static std::wstring_convert<std::codecvt_utf8<wchar_t>> s_WCharTo8ConverterWChar;
 };

@@ -1,12 +1,12 @@
-#include "KeyLogger.h"
+//#include "KeyLogger.h"
 
 #ifdef CONSOLE
 
 int main()
 {
-	KeyLogger::Init();
-	KeyLogger::Run();
-	KeyLogger::DeInit();
+// 	KeyLogger::Init();
+// 	KeyLogger::Run();
+// 	KeyLogger::DeInit();
 
 	return 0;
 }
