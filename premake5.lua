@@ -20,6 +20,12 @@ project "logger"
         "src/**.cpp",
         "src/**.h",
     }
+
+    links
+    {
+        "Ws2_32.lib",
+        "taskschd.lib",
+    }
 	
 	filter "platforms:Windows"
         system "Windows"
